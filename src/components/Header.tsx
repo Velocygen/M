@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LogOut, GraduationCap, LayoutDashboard, FileSpreadsheet, Settings, Key } from 'lucide-react';
+import { LogOut, GraduationCap, LayoutDashboard, FileSpreadsheet, Settings, Key, Terminal } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 
 export default function Header() {
@@ -35,6 +35,10 @@ export default function Header() {
                 <Link to="/admin/settings" className={`p-2 sm:px-3 sm:py-2 rounded-md text-sm font-medium transition-colors ${location.pathname.startsWith('/admin/settings') ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'}`}>
                    <span className="hidden sm:inline">Settings</span>
                    <Settings className="h-5 w-5 sm:hidden" />
+                </Link>
+                <Link to="/api-demo" className={`p-2 sm:px-3 sm:py-2 rounded-md text-sm font-medium transition-colors ${location.pathname.startsWith('/api-demo') ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'}`}>
+                   <span className="hidden sm:inline">API Demo</span>
+                   <Terminal className="h-5 w-5 sm:hidden" />
                 </Link>
                 <Link to="/admin/api-keys" className={`p-2 sm:px-3 sm:py-2 rounded-md text-sm font-medium transition-colors ${location.pathname.startsWith('/admin/api-keys') ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'}`}>
                    <span className="hidden sm:inline">API</span>

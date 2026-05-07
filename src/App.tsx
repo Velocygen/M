@@ -14,6 +14,7 @@ import ResultsList from './pages/admin/ResultsList';
 import ResultForm from './pages/admin/ResultForm';
 import Settings from './pages/admin/Settings';
 import ApiKeys from './pages/admin/ApiKeys';
+import ApiDemo from './pages/ApiDemo';
 import { ThemeProvider } from './context/ThemeContext';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -42,6 +43,7 @@ export default function App() {
               <Route path="/admin/results/edit/:id" element={<ProtectedRoute><ResultForm /></ProtectedRoute>} />
               <Route path="/admin/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
               <Route path="/admin/api-keys" element={<ProtectedRoute><ApiKeys /></ProtectedRoute>} />
+              <Route path="/api-demo" element={<ApiDemo />} />
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           </main>
