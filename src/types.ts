@@ -25,6 +25,7 @@ export interface ApiKey {
 }
 
 export interface ExamResult {
+  id: string; // from document id
   studentName: string;
   fatherName: string;
   mothersName: string;

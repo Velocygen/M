@@ -196,13 +196,86 @@ export default function ApiKeys() {
         </div>
       </div>
       
-      <div className="mt-8 bg-blue-50 dark:bg-blue-900/10 rounded-xl p-6 border border-blue-100 dark:border-blue-800/30">
-         <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-300 mb-2">API Documentation</h3>
-         <p className="text-sm text-blue-700 dark:text-blue-400 mb-4">You can use your API key to fetch results (including draft/unpublished results) programmatically.</p>
-         <div className="bg-gray-900 rounded-md p-4 overflow-x-auto text-sm text-gray-300 font-mono">
-            <p><span className="text-pink-400">GET</span> {window.location.origin}/api/v1/results/:rollNumber</p>
-            <p className="mt-2 text-gray-500">Headers:</p>
-            <p>X-API-Key: vk_example_key_here</p>
+      <div className="mt-8 space-y-6">
+         <div className="bg-blue-50 dark:bg-blue-900/10 rounded-xl p-6 border border-blue-100 dark:border-blue-800/30">
+            <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-300 mb-2">API Documentation</h3>
+            <p className="text-sm text-blue-700 dark:text-blue-400 mb-4">You can use your API key to fetch results (including draft/unpublished results) programmatically. Use the endpoints below to integrate with your own website or application.</p>
+            
+            <div className="space-y-4">
+               <div>
+                  <h4 className="text-xs font-bold text-blue-900 dark:text-blue-200 uppercase tracking-wider mb-2">Base Endpoints</h4>
+                  <div className="bg-gray-900 rounded-lg p-4 overflow-x-auto text-sm text-gray-300 font-mono">
+                     <p className="mb-2"><span className="text-green-400 mr-2">GET</span> {window.location.origin}/api/v1/results <span className="text-gray-500 ml-2"># Fetch all results</span></p>
+                     <p><span className="text-green-400 mr-2">GET</span> {window.location.origin}/api/v1/results/:rollNumber <span className="text-gray-500 ml-2"># Fetch specific student</span></p>
+                  </div>
+               </div>
+
+               <div>
+                  <h4 className="text-xs font-bold text-blue-900 dark:text-blue-200 uppercase tracking-wider mb-2">Sample HTML/JavaScript Integration</h4>
+                  <p className="text-xs text-blue-600 dark:text-blue-400 mb-2">Copy this code to your website to fetch and display student results using your API key.</p>
+                  <div className="relative group">
+                     <button 
+                        onClick={() => copyToClipboard(`
+<script>
+async function checkResult(rollNumber) {
+  const apiKey = 'YOUR_API_KEY_HERE';
+  const url = '${window.location.origin}/api/v1/results/' + rollNumber;
+  
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'X-API-Key': apiKey,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (!response.ok) throw new Error('Result not found or API error');
+    
+    const result = await response.json();
+    console.log('Student Result:', result);
+    alert('Student: ' + result.studentName + '\\nPercentage: ' + result.percentage + '%');
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Failed to fetch result');
+  }
+}
+</script>
+                        `.trim())}
+                        className="absolute right-4 top-4 p-2 text-gray-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                     >
+                        <Copy className="h-4 w-4" />
+                     </button>
+                     <pre className="bg-gray-900 rounded-lg p-4 overflow-x-auto text-xs text-gray-300 font-mono leading-relaxed">
+{`<script>
+async function checkResult(rollNumber) {
+  const apiKey = 'YOUR_API_KEY_HERE';
+  const url = '${window.location.origin}/api/v1/results/' + rollNumber;
+  
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'X-API-Key': apiKey,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (!response.ok) throw new Error('Result not found or API error');
+    
+    const result = await response.json();
+    console.log('Student Result:', result);
+    alert('Student: ' + result.studentName + '\\nPercentage: ' + result.percentage + '%');
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Failed to fetch result');
+  }
+}
+</script>`}
+                     </pre>
+                  </div>
+               </div>
+            </div>
          </div>
       </div>
     </div>
