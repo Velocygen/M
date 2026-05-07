@@ -1,0 +1,6 @@
+{
+  "name": "Velocygen Result Management System",
+  "description": "A complete, production-ready result management system with Firebase authentication and Firestore. Admins can manage student exam results, while students can securely check their published results using their roll number.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

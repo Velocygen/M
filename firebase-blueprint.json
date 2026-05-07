@@ -1,0 +1,95 @@
+{
+  "entities": {
+    "SiteSettings": {
+      "title": "SiteSettings",
+      "description": "Global settings for the academy site",
+      "type": "object",
+      "properties": {
+        "academyName": { "type": "string" },
+        "subTitle": { "type": "string" },
+        "signatureUrl": { "type": "string" },
+        "logoUrl": { "type": "string" },
+        "viewCount": { "type": "number" },
+        "countingEnabled": { "type": "boolean" }
+      },
+      "required": ["academyName", "subTitle", "signatureUrl", "logoUrl", "viewCount", "countingEnabled"]
+    },
+    "ApiKey": {
+      "title": "ApiKey",
+      "description": "API Key for accessing results programmatically",
+      "type": "object",
+      "properties": {
+        "key": { "type": "string" },
+        "name": { "type": "string" },
+        "limit": { "type": "number" },
+        "used": { "type": "number" },
+        "expiresAt": { "type": "number" },
+        "disabled": { "type": "boolean" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["key", "name", "limit", "used", "disabled", "createdAt"]
+    },
+    "Result": {
+      "title": "Result",
+      "description": "A student's exam result",
+      "type": "object",
+      "properties": {
+        "studentName": { "type": "string" },
+        "fatherName": { "type": "string" },
+        "rollNumber": { "type": "string" },
+        "class": { "type": "string" },
+        "examName": { "type": "string" },
+        "subjects": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "subjectName": { "type": "string" },
+              "marksObtained": { "type": "number" },
+              "totalMarks": { "type": "number" }
+            },
+            "required": ["subjectName", "marksObtained", "totalMarks"]
+          }
+        },
+        "totalObtained": { "type": "number" },
+        "totalPossible": { "type": "number" },
+        "percentage": { "type": "number" },
+        "grade": { "type": "string", "enum": ["A+", "A", "B+", "B", "C", "D", "F"] },
+        "passStatus": { "type": "boolean" },
+        "published": { "type": "boolean" },
+        "createdAt": { "type": "timestamp" },
+        "updatedAt": { "type": "timestamp" }
+      },
+      "required": [
+        "studentName",
+        "fatherName",
+        "rollNumber",
+        "class",
+        "examName",
+        "subjects",
+        "totalObtained",
+        "totalPossible",
+        "percentage",
+        "grade",
+        "passStatus",
+        "published",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/apiKeys/{apiKeyId}": {
+      "schema": { "$ref": "ApiKey" },
+      "description": "Stores API keys."
+    },
+    "/settings/{settingId}": {
+      "schema": { "$ref": "SiteSettings" },
+      "description": "Global settings for the application."
+    },
+    "/results/{resultId}": {
+      "schema": { "$ref": "Result" },
+      "description": "Stores all student results."
+    }
+  }
+}

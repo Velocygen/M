@@ -1,0 +1,129 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Admin helper
+    function isAdmin() {
+      // Allow access if the user is signed in. Since there is no public sign-up, any logged-in user is an admin.
+      return request.auth != null;
+    }
+
+    // Validation Helpers
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+
+    function isValidSubject(subject) {
+      return subject.keys().hasAll(['subjectName', 'marksObtained', 'totalMarks']) &&
+             subject.keys().size() == 3 &&
+             subject.subjectName is string && subject.subjectName.size() > 0 && subject.subjectName.size() <= 100 &&
+             subject.marksObtained is number && subject.marksObtained >= 0 &&
+             subject.totalMarks is number && subject.totalMarks > 0 &&
+             subject.marksObtained <= subject.totalMarks;
+    }
+
+    function isValidResult(data) {
+      return data.keys().hasAll([
+        'studentName', 'fatherName', 'rollNumber', 'class', 'examName', 
+        'subjects', 'totalObtained', 'totalPossible', 'percentage', 
+        'grade', 'passStatus', 'published', 'createdAt', 'updatedAt'
+      ]) &&
+      (data.keys().size() >= 14 && data.keys().size() <= 16) &&
+      data.studentName is string && data.studentName.size() > 0 && data.studentName.size() <= 100 &&
+      data.fatherName is string && data.fatherName.size() > 0 && data.fatherName.size() <= 100 &&
+      (!data.keys().hasAll(['mothersName']) || (data.mothersName is string && data.mothersName.size() <= 100)) &&
+      (!data.keys().hasAll(['place']) || (data.place is string && data.place.size() <= 100)) &&
+      data.rollNumber is string && data.rollNumber.size() > 0 && data.rollNumber.size() <= 50 &&
+      data.class is string && data.class.size() > 0 && data.class.size() <= 50 &&
+      data.examName is string && data.examName.size() > 0 && data.examName.size() <= 100 &&
+      data.subjects is list && data.subjects.size() > 0 && data.subjects.size() <= 20 &&
+      isValidSubject(data.subjects[0]) && // check at least first item dynamically
+      data.totalObtained is number && data.totalObtained >= 0 &&
+      data.totalPossible is number && data.totalPossible > 0 &&
+      data.percentage is number && data.percentage >= 0 && data.percentage <= 100 &&
+      data.grade is string && data.grade.matches('^(A\\+|A|B\\+|B|C|D|F)$') &&
+      data.passStatus is bool &&
+      data.published is bool &&
+      data.createdAt is number &&
+      data.updatedAt is number;
+    }
+
+    function isValidSiteSettings(data) {
+      return data.keys().hasAll(['academyName', 'subTitle', 'signatureUrl', 'logoUrl', 'viewCount', 'countingEnabled']) &&
+             data.keys().size() == 6 &&
+             data.academyName is string && data.academyName.size() <= 200 &&
+             data.subTitle is string && data.subTitle.size() <= 200 &&
+             data.signatureUrl is string && data.signatureUrl.size() <= 1000 &&
+             data.logoUrl is string && data.logoUrl.size() <= 1000 &&
+             data.viewCount is number && data.viewCount >= 0 &&
+             data.countingEnabled is bool;
+    }
+
+    function isValidApiKey(data) {
+      return data.keys().hasAll(['key', 'name', 'limit', 'used', 'disabled', 'createdAt']) &&
+             (data.keys().size() >= 6 && data.keys().size() <= 7) &&
+             data.key is string && data.key.size() > 0 && data.key.size() <= 128 &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+             data.limit is number && data.limit >= 0 &&
+             data.used is number && data.used >= 0 &&
+             (!data.keys().hasAll(['expiresAt']) || data.expiresAt == null || data.expiresAt is number) &&
+             data.disabled is bool &&
+             data.createdAt is number;
+    }
+
+    // Collection constraints
+    match /apiKeys/{apiKeyId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin() && isValidApiKey(incoming());
+      allow update: if isAdmin() && isValidApiKey(incoming()) && incoming().createdAt == existing().createdAt;
+      allow delete: if isAdmin();
+    }
+
+    match /settings/{settingId} {
+      allow get: if true;
+      allow list: if isAdmin();
+      allow create: if isAdmin() && isValidSiteSettings(incoming());
+      
+      allow update: if (isAdmin() && isValidSiteSettings(incoming())) ||
+                    // Public view increment
+                    (settingId == 'site' && 
+                     incoming().diff(existing()).affectedKeys().hasOnly(['viewCount']) &&
+                     incoming().viewCount == existing().viewCount + 1 &&
+                     existing().countingEnabled == true);
+      
+      allow delete: if isAdmin();
+    }
+
+    match /results/{resultId} {
+      allow get: if isAdmin() || (existing().published == true);
+      allow list: if isAdmin() || (existing().published == true);
+
+      allow create: if isAdmin() && 
+                    isValidId(resultId) &&
+                    isValidResult(incoming());
+
+      allow update: if isAdmin() && (
+                      // Full Edit Action
+                      (incoming().diff(existing()).affectedKeys().hasOnly([
+                        'studentName', 'fatherName', 'mothersName', 'rollNumber', 'class', 'examName',
+                        'subjects', 'totalObtained', 'totalPossible', 'percentage',
+                        'grade', 'passStatus', 'published', 'place', 'updatedAt'
+                      ]) && isValidResult(incoming()) && incoming().createdAt == existing().createdAt)
+                      ||
+                      // Toggle Publish Action
+                      (incoming().diff(existing()).affectedKeys().hasOnly(['published', 'updatedAt']) &&
+                       isValidResult(incoming()) && incoming().createdAt == existing().createdAt)
+                    );
+      
+      allow delete: if isAdmin();
+    }
+  }
+}
